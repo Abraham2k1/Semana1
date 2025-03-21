@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header>
+        <h1>Bienvenido a mi página</h1>
+  
+        <nav>
+          <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="acerca.html">Acerca de</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="servicios.html">Servicios</a></li>
+            <li><a href="proyectos.html">Proyectos</a></li>
+          </ul>
+        </nav>
+      </header>
+    <h1>Contáctanos</h1>
+
+    <form id="formularioContacto">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required />
+        <p class="error" id="errorNombre"></p>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+        <p class="error" id="errorEmail"></p>
+
+        <label for="consulta">Motivo de contacto:</label>
+        <input type="text" id="consulta" name="consulta" required />
+        <p class="error" id="errorConsulta"></p>
+
+        <input type="submit" value="Enviar" id="submit" />
+    </form>
+
+    <script>
+        document.getElementById("formularioContacto").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let nombre = document.getElementById("nombre").value.trim();
+            let email = document.getElementById("email").value.trim();
+            let consulta = document.getElementById("consulta").value.trim();
+            let errores = false;
+
+            function mostrarError(id, mensaje) {
+                document.getElementById(id).textContent = mensaje;
+            }
+
+            function limpiarErrores() {
+                document.querySelectorAll(".error").forEach(el => el.textContent = "");
+            }
+
+            limpiarErrores();
+
+            if (nombre === "") {
+                mostrarError("errorNombre", "El nombre no puede estar vacío.");
+                errores = true;
+            }
+            if (email === "") {
+                mostrarError("errorEmail", "El correo no puede estar vacío.");
+                errores = true;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                mostrarError("errorEmail", "El correo no es válido.");
+                errores = true;
+            }
+            if (consulta === "") {
+                mostrarError("errorConsulta", "Debe ingresar un motivo de contacto.");
+                errores = true;
+            }
+
+            if (!errores) {
+                let formData = new FormData(this);
+
+                fetch("procesar.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Crear una nueva ventana con la respuesta
+                    let nuevaVentana = window.open("", "_blank");
+                    nuevaVentana.document.write(`
+                        <html>
+                        <head>
+                            <title>Respuesta del servidor</title>
+                            <link rel="stylesheet" href="styles.css" />
+                        </head>
+                        <body>
+                            <h1>Respuesta del servidor</h1>
+                            <p class="success">${data}</p>
+                            <a href="#" onclick="window.close()">Cerrar esta ventana</a>
+                        </body>
+                        </html>
+                    `);
+                })
+                .catch(error => console.error("Error en la petición:", error));
+            }
+        });
+    </script>
+</body>
+</html>
